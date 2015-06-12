@@ -1,0 +1,13 @@
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build
+/captures
+gradlew.bat
+gradlew
+# Intellij IDEA (see https://intellij-support.jetbrains.com/entries/23393067)
+*.iml
+.idea/*
+auth.properties
