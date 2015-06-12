@@ -5,4 +5,7 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="WordOccurrence" parent="@android:style/TextAppearance.Medium">
+
+    </style>
 </resources>
