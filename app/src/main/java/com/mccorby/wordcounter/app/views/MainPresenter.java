@@ -3,6 +3,7 @@ package com.mccorby.wordcounter.app.views;
 import android.util.Log;
 
 import com.mccorby.wordcounter.app.domain.BusImpl;
+import com.mccorby.wordcounter.app.domain.InteractorInvokerImpl;
 import com.mccorby.wordcounter.app.presentation.MainView;
 import com.mccorby.wordcounter.app.presentation.Presenter;
 import com.mccorby.wordcounter.datasource.cache.InMemoryCacheDatasource;
@@ -11,6 +12,8 @@ import com.mccorby.wordcounter.datasource.entities.WordOccurrenceEvent;
 import com.mccorby.wordcounter.datasource.network.NetworkDatasourceImpl;
 import com.mccorby.wordcounter.domain.abstractions.Bus;
 import com.mccorby.wordcounter.domain.entities.WordOccurrence;
+import com.mccorby.wordcounter.domain.interactors.GetWordListInteractor;
+import com.mccorby.wordcounter.domain.interactors.Interactor;
 import com.mccorby.wordcounter.domain.repository.WordOccurrenceRepository;
 import com.mccorby.wordcounter.repository.WordOccurrenceRepositoryImpl;
 import com.mccorby.wordcounter.repository.datasources.CacheDatasource;
@@ -18,6 +21,7 @@ import com.mccorby.wordcounter.repository.datasources.ExternalDatasource;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.Executors;
 
 import de.greenrobot.event.EventBus;
 
@@ -41,6 +45,8 @@ public class MainPresenter implements Presenter {
     private Bus mBus;
     private WordOccurrenceRepository repo;
     private MainView mMainView;
+    private Interactor mInteractor;
+    private InteractorInvokerImpl mInteractorInvoker;
 
     public MainPresenter(MainView mainView) {
         this.mMainView = mainView;
@@ -67,6 +73,9 @@ public class MainPresenter implements Presenter {
 
         ExternalDatasource externalDatasource = new NetworkDatasourceImpl(url);
         repo = new WordOccurrenceRepositoryImpl(externalDatasource, cacheDatasource);
+
+        mInteractor = new GetWordListInteractor(repo);
+        mInteractorInvoker = new InteractorInvokerImpl(Executors.newSingleThreadExecutor());
     }
 
     public WordOccurrence getWordOccurrence(int position) {
@@ -98,7 +107,6 @@ public class MainPresenter implements Presenter {
                     break;
             }
         }
-
     }
 
 
@@ -107,13 +115,7 @@ public class MainPresenter implements Presenter {
     @Override
     public void onCreate() {
         mBus.register(this);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                repo.start();
-            }
-        }).start();
-
+        mInteractorInvoker.execute(mInteractor);
     }
 
     @Override
