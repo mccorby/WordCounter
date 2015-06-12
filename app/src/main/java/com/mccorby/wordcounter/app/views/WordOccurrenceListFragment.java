@@ -2,7 +2,6 @@ package com.mccorby.wordcounter.app.views;
 
 import android.app.Fragment;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -11,22 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mccorby.wordcounter.R;
-import com.mccorby.wordcounter.app.domain.BusImpl;
 import com.mccorby.wordcounter.app.presentation.MainView;
 import com.mccorby.wordcounter.app.views.adapter.WordOccurrenceListAdapter;
-import com.mccorby.wordcounter.datasource.cache.InMemoryCacheDatasource;
-import com.mccorby.wordcounter.datasource.network.NetworkDatasourceImpl;
-import com.mccorby.wordcounter.domain.abstractions.Bus;
-import com.mccorby.wordcounter.domain.entities.WordOccurrence;
-import com.mccorby.wordcounter.domain.repository.WordOccurrenceRepository;
-import com.mccorby.wordcounter.repository.WordOccurrenceRepositoryImpl;
-import com.mccorby.wordcounter.repository.datasources.CacheDatasource;
-import com.mccorby.wordcounter.repository.datasources.ExternalDatasource;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * Use the {@link WordOccurrenceListFragment#newInstance} factory method to
@@ -38,7 +23,7 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
     private static final String TAG = WordOccurrenceListFragment.class.getSimpleName();
     private WordOccurrenceListAdapter mAdapter;
 
-    MainPresenter mPresenter;
+    static MainPresenter mPresenter;
 
 
     /**
@@ -56,11 +41,19 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // TODO This to be replaced by injection!
+        if (mPresenter == null) {
+            mPresenter = new MainPresenter(this);
+            mPresenter.onCreate();
+        }
+        mPresenter.setMainView(this);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        // TODO This to be replaced by injection!
-        mPresenter = new MainPresenter(this);
 
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_word_occurrence_list, container, false);
@@ -86,6 +79,12 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
     public void onPause() {
         super.onPause();
         mPresenter.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mPresenter.onDestroy();
     }
 
     @Override

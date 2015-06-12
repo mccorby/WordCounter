@@ -22,6 +22,17 @@ import java.net.URL;
 import de.greenrobot.event.EventBus;
 
 /**
+ * The presenter in the MVP pattern.
+ * The presenter acts as a mediator between the view and the data.
+ * The data is provided by a repository object.
+ * Note: The lifecycle of the presenter differs from that of its view. In this case the Presenter is
+ * a static reference in the view (fragment or activity) that is kept during recreation of the activity
+ * (and its fragment). If a process or out of memory error happens, this object is likely to be killed
+ * and recreated again in the view that invokes.
+ * This has been done to avoid new calls to obtain the words if it's already in progress.
+ * A side effect of this approach is that the presenter is never unregistered from the bus which might
+ * cause problems in more complex applications. A solution would be the use of RxJava that offers
+ * a better decoupling than a bus.
  * Created by JAC on 12/06/2015.
  */
 public class MainPresenter implements Presenter {
@@ -29,11 +40,15 @@ public class MainPresenter implements Presenter {
     private static final String TAG = MainPresenter.class.getSimpleName();
     private Bus mBus;
     private WordOccurrenceRepository repo;
-    private MainView mView;
+    private MainView mMainView;
 
-    public MainPresenter(MainView view) {
-        this.mView = view;
+    public MainPresenter(MainView mainView) {
+        this.mMainView = mainView;
         injectObjects();
+    }
+
+    public void setMainView(MainView mainView) {
+        this.mMainView = mainView;
     }
 
     private void injectObjects() {
@@ -66,18 +81,22 @@ public class MainPresenter implements Presenter {
 
     public void onEvent(WordOccurrenceEvent event) {
         Log.d(TAG, "Received new word " + event.getWordOccurrence());
-        mView.notifyNewDataIsAvailable();
+        if (mMainView != null) {
+            mMainView.notifyNewDataIsAvailable();
+        }
 
     }
 
     public void onEvent(ProcessEvent event) {
         Log.d(TAG, "PROCESS => " + event.getEventType());
-        switch (event.getEventType()) {
-            case STARTED:
-                break;
-            case DONE:
-                mView.processDone();
-                break;
+        if (mMainView != null) {
+            switch (event.getEventType()) {
+                case STARTED:
+                    break;
+                case DONE:
+                    mMainView.processDone();
+                    break;
+            }
         }
 
     }
@@ -87,11 +106,6 @@ public class MainPresenter implements Presenter {
 
     @Override
     public void onCreate() {
-
-    }
-
-    @Override
-    public void onResume() {
         mBus.register(this);
         new Thread(new Runnable() {
             @Override
@@ -99,15 +113,19 @@ public class MainPresenter implements Presenter {
                 repo.start();
             }
         }).start();
+
+    }
+
+    @Override
+    public void onResume() {
     }
 
     @Override
     public void onPause() {
-        mBus.unregister(this);
     }
 
     @Override
     public void onDestroy() {
-
+        mMainView = null;
     }
 }
