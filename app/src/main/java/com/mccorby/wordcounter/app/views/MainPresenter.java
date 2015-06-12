@@ -75,6 +75,8 @@ public class MainPresenter implements Presenter {
         repo = new WordOccurrenceRepositoryImpl(externalDatasource, cacheDatasource);
 
         mInteractor = new GetWordListInteractor(repo);
+        // The Executor is a SingleThreadExecutor that provides all I need in this assigment:
+        // It has a single worker thread that executes tasks sequentially (actually just one task)
         mInteractorInvoker = new InteractorInvokerImpl(Executors.newSingleThreadExecutor());
     }
 
