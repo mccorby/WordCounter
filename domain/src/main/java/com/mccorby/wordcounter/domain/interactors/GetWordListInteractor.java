@@ -1,6 +1,5 @@
 package com.mccorby.wordcounter.domain.interactors;
 
-import com.mccorby.wordcounter.domain.abstractions.Bus;
 import com.mccorby.wordcounter.domain.repository.WordOccurrenceRepository;
 
 /**
@@ -11,15 +10,13 @@ import com.mccorby.wordcounter.domain.repository.WordOccurrenceRepository;
 public class GetWordListInteractor implements Interactor {
 
     private final WordOccurrenceRepository mRepository;
-    private final Bus mBus;
 
-    public GetWordListInteractor(Bus bus, WordOccurrenceRepository repository) {
+    public GetWordListInteractor(WordOccurrenceRepository repository) {
         this.mRepository = repository;
-        mBus = bus;
     }
 
     @Override
     public void execute() {
-        mBus.post(mRepository.getWordOccurrences());
+        mRepository.start();
     }
 }
