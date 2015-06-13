@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, new WordOccurrenceListFragment())
+                    .add(R.id.container, WordOccurrenceListFragment.newInstance())
                     .commit();
         }
     }

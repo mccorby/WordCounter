@@ -32,7 +32,7 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
      * this fragment using the provided parameters.
      * @return A new instance of fragment WordOccurrenceListFragment.
      */
-    public static WordOccurrenceListFragment newInstance(String param1, String param2) {
+    public static WordOccurrenceListFragment newInstance() {
         WordOccurrenceListFragment fragment = new WordOccurrenceListFragment();
         return fragment;
     }
