@@ -2,7 +2,6 @@ package com.mccorby.wordcounter.app.views.main;
 
 import android.util.Log;
 
-import com.mccorby.wordcounter.app.domain.interactors.SortWordOccurrencesInteractor;
 import com.mccorby.wordcounter.app.presentation.MainView;
 import com.mccorby.wordcounter.app.presentation.Presenter;
 import com.mccorby.wordcounter.datasource.cache.InMemoryCacheDatasource;
@@ -15,6 +14,7 @@ import com.mccorby.wordcounter.domain.abstractions.InteractorInvoker;
 import com.mccorby.wordcounter.domain.entities.WordOccurrence;
 import com.mccorby.wordcounter.domain.interactors.GetWordListInteractor;
 import com.mccorby.wordcounter.domain.interactors.Interactor;
+import com.mccorby.wordcounter.domain.interactors.SortWordOccurrencesInteractor;
 import com.mccorby.wordcounter.domain.repository.WordOccurrenceRepository;
 import com.mccorby.wordcounter.repository.WordOccurrenceRepositoryImpl;
 import com.mccorby.wordcounter.repository.datasources.CacheDatasource;
@@ -23,7 +23,6 @@ import com.mccorby.wordcounter.repository.datasources.ExternalDatasource;
 import java.io.File;
 import java.net.URL;
 import java.util.Comparator;
-import java.util.List;
 
 /**
  * The presenter in the MVP pattern.
@@ -43,13 +42,12 @@ public class MainPresenter implements Presenter {
 
     private static final String TAG = MainPresenter.class.getSimpleName();
 
-
     public enum SORTING {
         DEFAULT, ALPHANUMERIC, OCCURRENCES
     }
 
-    Bus mBus;
-    private WordOccurrenceRepository repo;
+    private Bus mBus;
+    private WordOccurrenceRepository mRepository;
     private Interactor mInteractor;
     private InteractorInvoker mInteractorInvoker;
 
@@ -57,20 +55,13 @@ public class MainPresenter implements Presenter {
     // Root directory for files stored locally
     private final File mRootDirectory;
 
-    /**
-     * A reference to the list of words to handle sorting.
-     * I consider the sorted list belongs to the presentation layer thus it should
-     * be handled directly by the presenter.
-     */
-    private List<WordOccurrence> mSortedList;
-
-    public MainPresenter(MainView mainView, Bus bus, WordOccurrenceRepository repo,
+    public MainPresenter(MainView mainView, Bus bus, WordOccurrenceRepository mReposiroty,
                          Interactor defaultInteractor, InteractorInvoker interactorInvoker,
                          File rootDirectory) {
         this.mMainView = mainView;
         this.mRootDirectory = rootDirectory;
         this.mBus = bus;
-        this.repo = repo;
+        this.mRepository = mReposiroty;
         this.mInteractor = defaultInteractor;
         this.mInteractorInvoker = interactorInvoker;
     }
@@ -80,15 +71,12 @@ public class MainPresenter implements Presenter {
     }
 
     public WordOccurrence getWordOccurrence(int position) {
-        if (mSortedList != null) {
-            return mSortedList.get(position);
-        }
-        return repo.getWordOccurrences().get(position);
+        return mRepository.getWordOccurrences().get(position);
     }
 
     public int getWordListSize() {
         // Repository size and sorted list must be the same. No need to check.
-        return repo.size();
+        return mRepository.size();
     }
 
     // Events this presenter listens to
@@ -149,31 +137,26 @@ public class MainPresenter implements Presenter {
         Comparator<WordOccurrence> comparator = null;
         switch (sorting) {
             case ALPHANUMERIC:
-                mSortedList = repo.getWordOccurrences();
                 comparator = mAlphanumericComparator;
                 break;
             case OCCURRENCES:
-                mSortedList = repo.getWordOccurrences();
                 comparator = mOccurrencesComparator;
                 break;
             case DEFAULT:
-                // Sorted list no longer needed. Rely on repo data structure.
-                mSortedList = null;
+                // Sorted list no longer needed. Rely on mRepository data structure.
                 break;
         }
-        if (mSortedList != null) {
-            mMainView.processStarted();
-            Interactor sortInteractor = new SortWordOccurrencesInteractor(mSortedList, mBus, comparator);
-            mInteractorInvoker.execute(sortInteractor);
-        }
+        mMainView.processStarted();
+        Interactor sortInteractor = new SortWordOccurrencesInteractor(mRepository, comparator);
+        mInteractorInvoker.execute(sortInteractor);
     }
 
     public void processFile(File file) {
         ExternalDatasource externalDatasource = new FileDatasourceImpl(mBus, file);
         CacheDatasource cacheDatasource = new InMemoryCacheDatasource(mBus);
 
-        repo = new WordOccurrenceRepositoryImpl(externalDatasource, cacheDatasource);
-        mInteractor = new GetWordListInteractor(repo);
+        mRepository = new WordOccurrenceRepositoryImpl(externalDatasource, cacheDatasource);
+        mInteractor = new GetWordListInteractor(mRepository);
         mMainView.processStarted();
         mInteractorInvoker.execute(mInteractor);
     }
@@ -183,8 +166,8 @@ public class MainPresenter implements Presenter {
             ExternalDatasource externalDatasource = new NetworkDatasourceImpl(mBus, url);
             CacheDatasource cacheDatasource = new InMemoryCacheDatasource(mBus);
 
-            repo = new WordOccurrenceRepositoryImpl(externalDatasource, cacheDatasource);
-            mInteractor = new GetWordListInteractor(repo);
+            mRepository = new WordOccurrenceRepositoryImpl(externalDatasource, cacheDatasource);
+            mInteractor = new GetWordListInteractor(mRepository);
             mMainView.processStarted();
             mInteractorInvoker.execute(mInteractor);
         }

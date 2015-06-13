@@ -1,11 +1,14 @@
 package com.mccorby.wordcounter.datasource.cache;
 
+import com.mccorby.wordcounter.datasource.entities.ProcessEvent;
 import com.mccorby.wordcounter.datasource.entities.WordOccurrenceEvent;
 import com.mccorby.wordcounter.domain.abstractions.Bus;
 import com.mccorby.wordcounter.domain.entities.WordOccurrence;
 import com.mccorby.wordcounter.repository.datasources.CacheDatasource;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,16 +33,12 @@ public class InMemoryCacheDatasource implements CacheDatasource {
 
     public InMemoryCacheDatasource(Bus bus) {
         mData = new LinkedHashMap<>();
+        mClientList = new ArrayList<>();
         this.mBus = bus;
     }
 
     @Override
     public synchronized List<WordOccurrence> getWordOccurrences() {
-        if (mClientList == null) {
-            mClientList = new ArrayList<>();
-        }
-        mClientList.clear();
-        mClientList.addAll(mData.values());
         return mClientList;
     }
 
@@ -52,6 +51,8 @@ public class InMemoryCacheDatasource implements CacheDatasource {
             cachedWord = newWord;
         }
         mData.put(newWord, cachedWord);
+        mClientList.clear();
+        mClientList.addAll(mData.values());
 
         if (mBus != null) {
             mBus.post(new WordOccurrenceEvent(cachedWord));
@@ -65,5 +66,18 @@ public class InMemoryCacheDatasource implements CacheDatasource {
 
     @Override
     public void onProcessDone() {
+    }
+
+    @Override
+    public synchronized void sort(Comparator<WordOccurrence> comparator) {
+        Collections.sort(mClientList, comparator);
+        mBus.post(new ProcessEvent(ProcessEvent.EVENTS.SORT_DONE));
+    }
+
+    @Override
+    public synchronized void resetSorting() {
+        mClientList.clear();
+        mClientList.addAll(mData.values());
+        mBus.post(new ProcessEvent(ProcessEvent.EVENTS.SORT_DONE));
     }
 }

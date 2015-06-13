@@ -2,7 +2,7 @@ package com.mccorby.wordcounter.domain.repository;
 
 import com.mccorby.wordcounter.domain.entities.WordOccurrence;
 
-import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -18,4 +18,6 @@ public interface WordOccurrenceRepository {
 
     void addWordOccurrence(WordOccurrence wordOccurrence);
     List<WordOccurrence> getWordOccurrences();
+    void sort(Comparator<WordOccurrence> comparator);
+    void resetSorting();
 }
