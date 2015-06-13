@@ -2,10 +2,9 @@ package com.mccorby.wordcounter.repository;
 
 import com.mccorby.wordcounter.domain.entities.WordOccurrence;
 import com.mccorby.wordcounter.domain.repository.WordOccurrenceRepository;
-import com.mccorby.wordcounter.repository.datasources.ExternalDatasource;
 import com.mccorby.wordcounter.repository.datasources.CacheDatasource;
+import com.mccorby.wordcounter.repository.datasources.ExternalDatasource;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -28,6 +27,7 @@ public class WordOccurrenceRepositoryImpl implements WordOccurrenceRepository, E
 
     @Override
     public void start() {
+        mCacheDatasource.restart();
         mExternalDatasource.startReadingWords(this);
     }
 

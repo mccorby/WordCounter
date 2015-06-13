@@ -129,6 +129,9 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menuRefresh:
+                mPresenter.restart();
+                break;
             case R.id.menuSortAlpha:
                 mPresenter.sortList(MainPresenter.SORTING.ALPHANUMERIC);
                 break;

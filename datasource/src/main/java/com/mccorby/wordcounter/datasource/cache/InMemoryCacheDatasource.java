@@ -7,8 +7,6 @@ import com.mccorby.wordcounter.domain.entities.WordOccurrence;
 import com.mccorby.wordcounter.repository.datasources.CacheDatasource;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,5 +67,10 @@ public class InMemoryCacheDatasource implements CacheDatasource {
     @Override
     public void onProcessDone() {
         mBus.post(new ProcessEvent(ProcessEvent.EVENTS.DONE));
+    }
+
+    @Override
+    public void restart(){
+        mData.clear();
     }
 }

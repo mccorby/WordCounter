@@ -43,7 +43,6 @@ public class MainPresenter implements Presenter {
 
     private static final String TAG = MainPresenter.class.getSimpleName();
 
-
     public enum SORTING {
         DEFAULT, ALPHANUMERIC, OCCURRENCES
     }
@@ -188,6 +187,12 @@ public class MainPresenter implements Presenter {
             mMainView.processStarted();
             mInteractorInvoker.execute(mInteractor);
         }
+    }
+
+    public void restart() {
+        mMainView.processStarted();
+        mInteractor = new GetWordListInteractor(repo);
+        mInteractorInvoker.execute(mInteractor);
     }
 
 
