@@ -121,6 +121,9 @@ public class MainPresenter implements Presenter {
         if (mMainView != null) {
             switch (event.getEventType()) {
                 case STARTED:
+                    if (mMainView != null) {
+                        mMainView.processStarted();
+                    }
                     break;
                 case DONE:
                     if (mMainView != null) {
@@ -128,7 +131,10 @@ public class MainPresenter implements Presenter {
                     }
                     break;
                 case SORT_DONE:
-                    mMainView.notifyNewDataIsAvailable();
+                    if (mMainView != null) {
+                        mMainView.notifyNewDataIsAvailable();
+                        mMainView.processDone();
+                    }
                     break;
             }
         }
@@ -170,6 +176,7 @@ public class MainPresenter implements Presenter {
                 break;
         }
         if (mSortedList != null) {
+            mMainView.processStarted();
             Interactor sortInteractor = new SortWordOccurrencesInteractor(mSortedList, mBus, comparator);
             mInteractorInvoker.execute(sortInteractor);
         }
@@ -180,6 +187,9 @@ public class MainPresenter implements Presenter {
     @Override
     public void onCreate() {
         mBus.register(this);
+        if (mMainView != null) {
+            mMainView.processStarted();
+        }
         mInteractorInvoker.execute(mInteractor);
     }
 

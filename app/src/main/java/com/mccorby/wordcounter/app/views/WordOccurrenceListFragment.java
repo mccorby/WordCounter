@@ -4,8 +4,8 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +25,7 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
     private WordOccurrenceListAdapter mAdapter;
 
     static MainPresenter mPresenter;
-
+    private boolean isProcessing;
 
     /**
      * Use this factory method to create a new instance of
@@ -90,6 +90,14 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
     }
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        if (isProcessing) {
+            menu.clear();
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menuSortAlpha:
@@ -107,12 +115,19 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
     }
 
     @Override
+    public void processStarted() {
+        isProcessing = true;
+        getActivity().invalidateOptionsMenu();
+    }
+
+    @Override
     public void notifyNewDataIsAvailable() {
         mAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void processDone() {
-        Log.d(TAG, "PROCESS DONE!!!");
+        isProcessing = false;
+        getActivity().invalidateOptionsMenu();
     }
 }

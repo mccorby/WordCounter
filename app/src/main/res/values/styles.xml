@@ -8,4 +8,8 @@
     <style name="WordOccurrence" parent="@android:style/TextAppearance.Medium">
 
     </style>
+
+    <style name="ToolbarStyle">
+        <item name="android:background">@android:color/holo_blue_light</item>
+    </style>
 </resources>

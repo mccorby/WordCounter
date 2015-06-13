@@ -5,6 +5,7 @@ package com.mccorby.wordcounter.app.presentation;
  */
 public interface MainView {
 
+    void processStarted();
     void notifyNewDataIsAvailable();
     void processDone();
 }
