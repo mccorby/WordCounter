@@ -55,11 +55,6 @@ public abstract class ExternalDatasourceImpl implements ExternalDatasource {
                 WordOccurrence occurrence = new WordOccurrence(matcher.group());
                 if (mListener != null)  {
                     mListener.onWordAvailable(occurrence);
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
                 }
             }
         }

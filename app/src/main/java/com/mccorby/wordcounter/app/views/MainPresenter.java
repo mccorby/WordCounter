@@ -14,6 +14,7 @@ import com.mccorby.wordcounter.domain.abstractions.Bus;
 import com.mccorby.wordcounter.domain.entities.WordOccurrence;
 import com.mccorby.wordcounter.domain.interactors.GetWordListInteractor;
 import com.mccorby.wordcounter.domain.interactors.Interactor;
+import com.mccorby.wordcounter.domain.interactors.SortWordOccurrencesInteractor;
 import com.mccorby.wordcounter.domain.repository.WordOccurrenceRepository;
 import com.mccorby.wordcounter.repository.WordOccurrenceRepositoryImpl;
 import com.mccorby.wordcounter.repository.datasources.CacheDatasource;
@@ -21,6 +22,8 @@ import com.mccorby.wordcounter.repository.datasources.ExternalDatasource;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.Executors;
 
 import de.greenrobot.event.EventBus;
@@ -42,11 +45,22 @@ import de.greenrobot.event.EventBus;
 public class MainPresenter implements Presenter {
 
     private static final String TAG = MainPresenter.class.getSimpleName();
+
+    public enum SORTING {
+        DEFAULT, ALPHANUMERIC, OCCURRENCES
+    }
+
     private Bus mBus;
     private WordOccurrenceRepository repo;
     private MainView mMainView;
     private Interactor mInteractor;
     private InteractorInvokerImpl mInteractorInvoker;
+
+    /** A reference to the list of words to handle sorting.
+     * I consider the sorted list belongs to the presentation layer thus it should
+     * be handled directly by the presenter.
+     */
+    private List<WordOccurrence> mSortedList;
 
     public MainPresenter(MainView mainView) {
         this.mMainView = mainView;
@@ -76,15 +90,20 @@ public class MainPresenter implements Presenter {
 
         mInteractor = new GetWordListInteractor(repo);
         // The Executor is a SingleThreadExecutor that provides all I need in this assigment:
-        // It has a single worker thread that executes tasks sequentially (actually just one task)
+        // It has a single worker thread that executes tasks sequentially
         mInteractorInvoker = new InteractorInvokerImpl(Executors.newSingleThreadExecutor());
     }
 
+
     public WordOccurrence getWordOccurrence(int position) {
+        if (mSortedList != null) {
+            return mSortedList.get(position);
+        }
         return repo.getWordOccurrences().get(position);
     }
 
     public int getWordListSize() {
+        // Repository size and sorted list must be the same. No need to check.
         return repo.size();
     }
 
@@ -105,12 +124,56 @@ public class MainPresenter implements Presenter {
                 case STARTED:
                     break;
                 case DONE:
+                    sortList(SORTING.OCCURRENCES);
                     mMainView.processDone();
                     break;
             }
         }
     }
 
+    private Comparator<WordOccurrence> mAlphanumericComparator = new Comparator<WordOccurrence>() {
+        @Override
+        public int compare(WordOccurrence lhs, WordOccurrence rhs) {
+            return lhs.getWord().compareToIgnoreCase(rhs.getWord());
+    }
+    };
+
+    private Comparator<WordOccurrence> mOccurrencesComparator = new Comparator<WordOccurrence>() {
+        @Override
+        public int compare(WordOccurrence lhs, WordOccurrence rhs) {
+            return rhs.getOccurrences() - lhs.getOccurrences();
+        }
+    };
+
+    /**
+     * Sorts the list as defined in the assignemnt.
+     * @param sorting the sorting type
+     */
+    public void sortList(SORTING sorting) {
+        Comparator<WordOccurrence> comparator = null;
+        switch (sorting) {
+            case ALPHANUMERIC:
+                mSortedList = repo.getWordOccurrences();
+                comparator = mAlphanumericComparator;
+                break;
+            case OCCURRENCES:
+                mSortedList = repo.getWordOccurrences();
+                comparator = mOccurrencesComparator;
+                break;
+            case DEFAULT:
+                // Sorted list no longer needed. Rely on repo data structure.
+                mSortedList = null;
+                break;
+        }
+        if (mSortedList != null) {
+            Interactor sortInteractor = new SortWordOccurrencesInteractor(mSortedList, mBus, comparator);
+            mInteractorInvoker.execute(sortInteractor);
+        }
+    }
+
+    public void onEvent(List<WordOccurrence> sortedList) {
+        mMainView.notifyNewDataIsAvailable();
+    }
 
     // Lifecycle related implementation
 
