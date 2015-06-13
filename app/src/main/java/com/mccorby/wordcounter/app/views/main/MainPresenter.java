@@ -1,4 +1,4 @@
-package com.mccorby.wordcounter.app.views;
+package com.mccorby.wordcounter.app.views.main;
 
 import android.util.Log;
 

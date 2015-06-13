@@ -1,4 +1,4 @@
-package com.mccorby.wordcounter.app.views;
+package com.mccorby.wordcounter.app.views.main;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;

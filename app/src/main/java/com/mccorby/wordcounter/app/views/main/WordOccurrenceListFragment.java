@@ -1,4 +1,4 @@
-package com.mccorby.wordcounter.app.views;
+package com.mccorby.wordcounter.app.views.main;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -199,6 +199,7 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
                         url = new URL(urlData);
                     } catch (MalformedURLException e) {
                         // We shouldn't be here
+                        e.printStackTrace();
                     }
                     mPresenter.processUrl(url);
                     break;

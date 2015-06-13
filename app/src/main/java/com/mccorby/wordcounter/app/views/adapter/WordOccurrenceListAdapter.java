@@ -1,16 +1,17 @@
 package com.mccorby.wordcounter.app.views.adapter;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.mccorby.wordcounter.R;
-import com.mccorby.wordcounter.app.views.MainPresenter;
+import com.mccorby.wordcounter.app.views.main.MainPresenter;
 import com.mccorby.wordcounter.domain.entities.WordOccurrence;
-import com.mccorby.wordcounter.domain.repository.WordOccurrenceRepository;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 /**
  * Created by JAC on 11/06/2015.
@@ -45,12 +46,14 @@ public class WordOccurrenceListAdapter extends RecyclerView.Adapter<WordOccurren
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
+        @InjectView(R.id.item_word_occurrence_list_word_tv)
         TextView wordTv;
+        @InjectView(R.id.item_word_occurrence_list_occurrences_tv)
         TextView occurrencesTv;
+
         public ViewHolder(View itemView) {
             super(itemView);
-            wordTv = (TextView) itemView.findViewById(R.id.item_word_occurrence_list_word_tv);
-            occurrencesTv = (TextView) itemView.findViewById(R.id.item_word_occurrence_list_occurrences_tv);
+            ButterKnife.inject(this, itemView);
         }
     }
 }

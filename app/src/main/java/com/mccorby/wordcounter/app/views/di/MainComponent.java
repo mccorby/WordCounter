@@ -1,8 +1,8 @@
 package com.mccorby.wordcounter.app.views.di;
 
 import com.mccorby.wordcounter.app.ActivityScope;
-import com.mccorby.wordcounter.app.views.MainPresenter;
-import com.mccorby.wordcounter.app.views.WordOccurrenceListFragment;
+import com.mccorby.wordcounter.app.views.main.MainPresenter;
+import com.mccorby.wordcounter.app.views.main.WordOccurrenceListFragment;
 
 import dagger.Component;
 

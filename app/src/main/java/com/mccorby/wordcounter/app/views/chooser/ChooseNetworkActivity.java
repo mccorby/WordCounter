@@ -81,12 +81,12 @@ public class ChooseNetworkActivity extends AppCompatActivity {
         if (!TextUtils.isEmpty(mUrlEt.getText())) {
             // Check it's a valid url
             try {
-                URL url = new URL(mUrlEt.getText().toString());
+                // TODO Dirty way of checking if the URL is valid
+                new URL(mUrlEt.getText().toString());
                 Intent resultIntent = new Intent();
-                resultIntent.putExtra(Constants.SELECTED_URL, url.toURI().getPath());
+                resultIntent.putExtra(Constants.SELECTED_URL, mUrlEt.getText().toString());
                 setResult(Activity.RESULT_OK, resultIntent);
                 finish();
-
             } catch (Exception e) {
                 BaseEvent error = new BaseEvent();
                 error.setErrorMessage(getString(R.string.bad_url));
