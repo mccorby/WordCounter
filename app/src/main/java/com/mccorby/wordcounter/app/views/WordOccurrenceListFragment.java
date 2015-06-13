@@ -2,7 +2,6 @@ package com.mccorby.wordcounter.app.views;
 
 import android.app.Fragment;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,6 +13,11 @@ import android.view.ViewGroup;
 import com.mccorby.wordcounter.R;
 import com.mccorby.wordcounter.app.presentation.MainView;
 import com.mccorby.wordcounter.app.views.adapter.WordOccurrenceListAdapter;
+import com.mccorby.wordcounter.app.views.di.DaggerMainComponent;
+import com.mccorby.wordcounter.app.views.di.MainComponent;
+import com.mccorby.wordcounter.app.views.di.MainModule;
+
+import javax.inject.Inject;
 
 /**
  * Use the {@link WordOccurrenceListFragment#newInstance} factory method to
@@ -25,7 +29,8 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
     private static final String TAG = WordOccurrenceListFragment.class.getSimpleName();
     private WordOccurrenceListAdapter mAdapter;
 
-    static MainPresenter mPresenter;
+    @Inject
+    MainPresenter mPresenter;
     private boolean isProcessing;
 
     /**
@@ -48,7 +53,10 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
         setHasOptionsMenu(true);
         // TODO This to be replaced by injection!
         if (mPresenter == null) {
-            mPresenter = new MainPresenter(this, Environment.getExternalStorageDirectory());
+            MainComponent component = DaggerMainComponent.builder()
+                    .mainModule(new MainModule(this))
+                    .build();
+            component.inject(this);
             mPresenter.onCreate();
         }
         mPresenter.setMainView(this);

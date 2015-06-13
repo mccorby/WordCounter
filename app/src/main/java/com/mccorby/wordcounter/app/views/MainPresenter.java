@@ -2,33 +2,20 @@ package com.mccorby.wordcounter.app.views;
 
 import android.util.Log;
 
-import com.mccorby.wordcounter.app.domain.BusImpl;
-import com.mccorby.wordcounter.app.domain.InteractorInvokerImpl;
 import com.mccorby.wordcounter.app.domain.interactors.SortWordOccurrencesInteractor;
 import com.mccorby.wordcounter.app.presentation.MainView;
 import com.mccorby.wordcounter.app.presentation.Presenter;
-import com.mccorby.wordcounter.datasource.cache.InMemoryCacheDatasource;
 import com.mccorby.wordcounter.datasource.entities.ProcessEvent;
 import com.mccorby.wordcounter.datasource.entities.WordOccurrenceEvent;
-import com.mccorby.wordcounter.datasource.file.FileDatasourceImpl;
-import com.mccorby.wordcounter.datasource.network.NetworkDatasourceImpl;
 import com.mccorby.wordcounter.domain.abstractions.Bus;
+import com.mccorby.wordcounter.domain.abstractions.InteractorInvoker;
 import com.mccorby.wordcounter.domain.entities.WordOccurrence;
-import com.mccorby.wordcounter.domain.interactors.GetWordListInteractor;
 import com.mccorby.wordcounter.domain.interactors.Interactor;
 import com.mccorby.wordcounter.domain.repository.WordOccurrenceRepository;
-import com.mccorby.wordcounter.repository.WordOccurrenceRepositoryImpl;
-import com.mccorby.wordcounter.repository.datasources.CacheDatasource;
-import com.mccorby.wordcounter.repository.datasources.ExternalDatasource;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.Executors;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * The presenter in the MVP pattern.
@@ -48,16 +35,16 @@ public class MainPresenter implements Presenter {
 
     private static final String TAG = MainPresenter.class.getSimpleName();
 
-
     public enum SORTING {
         DEFAULT, ALPHANUMERIC, OCCURRENCES
     }
 
-    private Bus mBus;
+    Bus mBus;
     private WordOccurrenceRepository repo;
-    private MainView mMainView;
     private Interactor mInteractor;
-    private InteractorInvokerImpl mInteractorInvoker;
+    private InteractorInvoker mInteractorInvoker;
+
+    private MainView mMainView;
     // Root directory for files stored locally
     private final File mRootDirectory;
 
@@ -68,44 +55,20 @@ public class MainPresenter implements Presenter {
      */
     private List<WordOccurrence> mSortedList;
 
-    public MainPresenter(MainView mainView, File rootDirectory) {
+    public MainPresenter(MainView mainView, Bus bus, WordOccurrenceRepository repo,
+                         Interactor defaultInteractor, InteractorInvoker interactorInvoker,
+                         File rootDirectory) {
         this.mMainView = mainView;
         this.mRootDirectory = rootDirectory;
-        injectObjects();
+        this.mBus = bus;
+        this.repo = repo;
+        this.mInteractor = defaultInteractor;
+        this.mInteractorInvoker = interactorInvoker;
     }
 
     public void setMainView(MainView mainView) {
         this.mMainView = mainView;
     }
-
-    private void injectObjects() {
-        // TODO For testing purposes. Remove
-        EventBus eventBus = new EventBus();
-        mBus = new BusImpl(eventBus);
-        CacheDatasource cacheDatasource = new InMemoryCacheDatasource(mBus);
-
-
-        URL url = null;
-        try {
-            url = new URL("http://textfiles.com/stories/3lpigs.txt");
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-
-
-
-        ExternalDatasource externalDatasource = new NetworkDatasourceImpl(url);
-
-        externalDatasource = new FileDatasourceImpl(new File(mRootDirectory, "aesop11.txt"));
-
-        repo = new WordOccurrenceRepositoryImpl(externalDatasource, cacheDatasource);
-
-        mInteractor = new GetWordListInteractor(repo);
-        // The Executor is a SingleThreadExecutor that provides all I need in this assigment:
-        // It has a single worker thread that executes tasks sequentially
-        mInteractorInvoker = new InteractorInvokerImpl(Executors.newSingleThreadExecutor());
-    }
-
 
     public WordOccurrence getWordOccurrence(int position) {
         if (mSortedList != null) {
