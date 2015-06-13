@@ -1,9 +1,13 @@
 package com.mccorby.wordcounter.app.views;
 
+import android.app.Activity;
 import android.app.Fragment;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,22 +15,33 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mccorby.wordcounter.R;
+import com.mccorby.wordcounter.app.Constants;
 import com.mccorby.wordcounter.app.presentation.MainView;
 import com.mccorby.wordcounter.app.views.adapter.WordOccurrenceListAdapter;
+import com.mccorby.wordcounter.app.views.chooser.ChooseNetworkActivity;
 import com.mccorby.wordcounter.app.views.di.DaggerMainComponent;
 import com.mccorby.wordcounter.app.views.di.MainComponent;
 import com.mccorby.wordcounter.app.views.di.MainModule;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.inject.Inject;
 
 /**
  * Use the {@link WordOccurrenceListFragment#newInstance} factory method to
  * create an instance of this fragment.
+ *
+ * TODO Refactor source chooser
  */
 public class WordOccurrenceListFragment extends Fragment implements MainView {
 
 
     private static final String TAG = WordOccurrenceListFragment.class.getSimpleName();
+    private static final int FILE_SELECTION_REQUEST_CODE = 1;
+    private static final int NETWORK_SELECTION_REQUEST_CODE = 2;
+
     private WordOccurrenceListAdapter mAdapter;
 
     @Inject
@@ -36,6 +51,7 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
+     *
      * @return A new instance of fragment WordOccurrenceListFragment.
      */
     public static WordOccurrenceListFragment newInstance() {
@@ -51,7 +67,6 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        // TODO This to be replaced by injection!
         if (mPresenter == null) {
             MainComponent component = DaggerMainComponent.builder()
                     .mainModule(new MainModule(this))
@@ -118,6 +133,12 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
             case R.id.menuSortOccurrences:
                 mPresenter.sortList(MainPresenter.SORTING.OCCURRENCES);
                 break;
+            case R.id.menuSourceFile:
+                chooseFile();
+                break;
+            case R.id.menuSourceNetwork:
+                chooseNetwork();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -139,4 +160,40 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
         isProcessing = false;
         getActivity().invalidateOptionsMenu();
     }
+
+    private void chooseFile() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("file/*");
+        startActivityForResult(intent, FILE_SELECTION_REQUEST_CODE);
+    }
+
+    private void chooseNetwork() {
+        Intent intent = new Intent(getActivity(), ChooseNetworkActivity.class);
+        startActivityForResult(intent, NETWORK_SELECTION_REQUEST_CODE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == Activity.RESULT_OK)
+            switch (requestCode) {
+                case FILE_SELECTION_REQUEST_CODE:
+                    String filePath = data.getDataString();
+                    Uri uri = Uri.parse(filePath);
+                    File file = new File(uri.getPath());
+                    mPresenter.processFile(file);
+                    break;
+                case NETWORK_SELECTION_REQUEST_CODE:
+                    String urlData = data.getStringExtra(Constants.SELECTED_URL);
+                    Log.d(TAG, "url copied " + urlData);
+                    URL url = null;
+                    try {
+                        url = new URL(urlData);
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    }
+                    mPresenter.processUrl(url);
+                    break;
+            }
+    }
+
 }

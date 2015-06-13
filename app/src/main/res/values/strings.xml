@@ -2,7 +2,13 @@
     <string name="app_name">Word Counter</string>
     <string name="title_activity_main">Word Counter</string>
 
-    <string name="sort_default">Default</string>
-    <string name="sort_alpha">Alphanumeric</string>
-    <string name="sort_occurrences">By occurrences</string>
+    <string name="sort_default">Default sorting</string>
+    <string name="sort_alpha">Sort alphanumeric</string>
+    <string name="sort_occurrences">Sort by occurrences</string>
+    <string name="choose_source">Source</string>
+    <string name="source_file">Choose file</string>
+    <string name="source_network">Choose a URL</string>
+
+    <string name="title_activity_choose_network">Choose URL</string>
+    <string name="save">Save</string>
 </resources>

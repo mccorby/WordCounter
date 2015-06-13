@@ -5,15 +5,23 @@ import android.util.Log;
 import com.mccorby.wordcounter.app.domain.interactors.SortWordOccurrencesInteractor;
 import com.mccorby.wordcounter.app.presentation.MainView;
 import com.mccorby.wordcounter.app.presentation.Presenter;
+import com.mccorby.wordcounter.datasource.cache.InMemoryCacheDatasource;
 import com.mccorby.wordcounter.datasource.entities.ProcessEvent;
 import com.mccorby.wordcounter.datasource.entities.WordOccurrenceEvent;
+import com.mccorby.wordcounter.datasource.file.FileDatasourceImpl;
+import com.mccorby.wordcounter.datasource.network.NetworkDatasourceImpl;
 import com.mccorby.wordcounter.domain.abstractions.Bus;
 import com.mccorby.wordcounter.domain.abstractions.InteractorInvoker;
 import com.mccorby.wordcounter.domain.entities.WordOccurrence;
+import com.mccorby.wordcounter.domain.interactors.GetWordListInteractor;
 import com.mccorby.wordcounter.domain.interactors.Interactor;
 import com.mccorby.wordcounter.domain.repository.WordOccurrenceRepository;
+import com.mccorby.wordcounter.repository.WordOccurrenceRepositoryImpl;
+import com.mccorby.wordcounter.repository.datasources.CacheDatasource;
+import com.mccorby.wordcounter.repository.datasources.ExternalDatasource;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Comparator;
 import java.util.List;
 
@@ -34,6 +42,7 @@ import java.util.List;
 public class MainPresenter implements Presenter {
 
     private static final String TAG = MainPresenter.class.getSimpleName();
+
 
     public enum SORTING {
         DEFAULT, ALPHANUMERIC, OCCURRENCES
@@ -155,6 +164,29 @@ public class MainPresenter implements Presenter {
             mInteractorInvoker.execute(sortInteractor);
         }
     }
+
+    public void processFile(File file) {
+        ExternalDatasource externalDatasource = new FileDatasourceImpl(file);
+        CacheDatasource cacheDatasource = new InMemoryCacheDatasource(mBus);
+
+        repo = new WordOccurrenceRepositoryImpl(externalDatasource, cacheDatasource);
+        mInteractor = new GetWordListInteractor(repo);
+        mMainView.processStarted();
+        mInteractorInvoker.execute(mInteractor);
+    }
+
+    public void processUrl(URL url) {
+        if (url != null) {
+            ExternalDatasource externalDatasource = new NetworkDatasourceImpl(url);
+            CacheDatasource cacheDatasource = new InMemoryCacheDatasource(mBus);
+
+            repo = new WordOccurrenceRepositoryImpl(externalDatasource, cacheDatasource);
+            mInteractor = new GetWordListInteractor(repo);
+            mMainView.processStarted();
+            mInteractorInvoker.execute(mInteractor);
+        }
+    }
+
 
     // Lifecycle related implementation
 

@@ -1,8 +1,18 @@
-<menu android:id="@+id/menuSort"
-      xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:tools="http://schemas.android.com/tools"
-      tools:context="com.mccorby.wordcounter.app.views.MainActivity"
+<menu
+    android:id="@+id/menuSort"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.mccorby.wordcounter.app.views.MainActivity"
     >
+
+
+    <item
+        android:id="@+id/menuSourceFile"
+        android:title="@string/source_file"
+        />
+    <item
+        android:id="@+id/menuSourceNetwork"
+        android:title="@string/source_network"/>
 
     <item
         android:id="@+id/menuSortDefault"
