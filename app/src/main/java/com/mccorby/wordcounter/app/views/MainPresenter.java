@@ -10,6 +10,7 @@ import com.mccorby.wordcounter.app.presentation.Presenter;
 import com.mccorby.wordcounter.datasource.cache.InMemoryCacheDatasource;
 import com.mccorby.wordcounter.datasource.entities.ProcessEvent;
 import com.mccorby.wordcounter.datasource.entities.WordOccurrenceEvent;
+import com.mccorby.wordcounter.datasource.file.FileDatasourceImpl;
 import com.mccorby.wordcounter.datasource.network.NetworkDatasourceImpl;
 import com.mccorby.wordcounter.domain.abstractions.Bus;
 import com.mccorby.wordcounter.domain.entities.WordOccurrence;
@@ -20,6 +21,7 @@ import com.mccorby.wordcounter.repository.WordOccurrenceRepositoryImpl;
 import com.mccorby.wordcounter.repository.datasources.CacheDatasource;
 import com.mccorby.wordcounter.repository.datasources.ExternalDatasource;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Comparator;
@@ -46,6 +48,7 @@ public class MainPresenter implements Presenter {
 
     private static final String TAG = MainPresenter.class.getSimpleName();
 
+
     public enum SORTING {
         DEFAULT, ALPHANUMERIC, OCCURRENCES
     }
@@ -55,6 +58,8 @@ public class MainPresenter implements Presenter {
     private MainView mMainView;
     private Interactor mInteractor;
     private InteractorInvokerImpl mInteractorInvoker;
+    // Root directory for files stored locally
+    private final File mRootDirectory;
 
     /**
      * A reference to the list of words to handle sorting.
@@ -63,8 +68,9 @@ public class MainPresenter implements Presenter {
      */
     private List<WordOccurrence> mSortedList;
 
-    public MainPresenter(MainView mainView) {
+    public MainPresenter(MainView mainView, File rootDirectory) {
         this.mMainView = mainView;
+        this.mRootDirectory = rootDirectory;
         injectObjects();
     }
 
@@ -86,7 +92,12 @@ public class MainPresenter implements Presenter {
             e.printStackTrace();
         }
 
+
+
         ExternalDatasource externalDatasource = new NetworkDatasourceImpl(url);
+
+        externalDatasource = new FileDatasourceImpl(new File(mRootDirectory, "aesop11.txt"));
+
         repo = new WordOccurrenceRepositoryImpl(externalDatasource, cacheDatasource);
 
         mInteractor = new GetWordListInteractor(repo);

@@ -2,6 +2,7 @@ package com.mccorby.wordcounter.app.views;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -47,7 +48,7 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
         setHasOptionsMenu(true);
         // TODO This to be replaced by injection!
         if (mPresenter == null) {
-            mPresenter = new MainPresenter(this);
+            mPresenter = new MainPresenter(this, Environment.getExternalStorageDirectory());
             mPresenter.onCreate();
         }
         mPresenter.setMainView(this);
