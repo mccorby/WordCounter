@@ -79,6 +79,7 @@ public abstract class ExternalDatasourceImpl implements ExternalDatasource {
         } finally{
             postProcessInput(is);
             mListener.onProcessDone();
+            mBus.post(new ProcessEvent(ProcessEvent.EVENTS.DONE));
         }
     }
 
