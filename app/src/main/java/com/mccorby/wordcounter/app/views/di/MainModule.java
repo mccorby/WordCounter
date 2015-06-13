@@ -8,6 +8,8 @@ import com.mccorby.wordcounter.app.domain.BusImpl;
 import com.mccorby.wordcounter.app.domain.InteractorInvokerImpl;
 import com.mccorby.wordcounter.app.presentation.MainView;
 import com.mccorby.wordcounter.app.views.MainPresenter;
+import com.mccorby.wordcounter.app.views.error.BasicErrorHandler;
+import com.mccorby.wordcounter.app.views.error.ErrorHandler;
 import com.mccorby.wordcounter.datasource.cache.InMemoryCacheDatasource;
 import com.mccorby.wordcounter.datasource.network.NetworkDatasourceImpl;
 import com.mccorby.wordcounter.domain.abstractions.Bus;
@@ -78,8 +80,8 @@ public class MainModule {
 
     @Provides
     @ActivityScope
-    public ExternalDatasource provideExternalDatasource(URL url) {
-        return new NetworkDatasourceImpl(url);
+    public ExternalDatasource provideExternalDatasource(Bus bus, URL url) {
+        return new NetworkDatasourceImpl(bus, url);
     }
 
     @Provides
@@ -98,5 +100,12 @@ public class MainModule {
     @ActivityScope
     public InteractorInvoker provideInteractorInvoker() {
         return new InteractorInvokerImpl(Executors.newSingleThreadExecutor());
+    }
+
+    @Provides
+    @ActivityScope
+    // TODO Should inject the Context here.
+    public ErrorHandler provideErrorHandler() {
+        return new BasicErrorHandler();
     }
 }

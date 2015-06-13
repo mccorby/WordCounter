@@ -13,11 +13,24 @@ import android.widget.EditText;
 
 import com.mccorby.wordcounter.R;
 import com.mccorby.wordcounter.app.Constants;
+import com.mccorby.wordcounter.app.views.di.ChooseNetworkComponent;
+import com.mccorby.wordcounter.app.views.di.ChooseNetworkModule;
+import com.mccorby.wordcounter.app.views.di.DaggerChooseNetworkComponent;
+import com.mccorby.wordcounter.app.views.error.ErrorHandler;
+import com.mccorby.wordcounter.datasource.entities.BaseEvent;
+
+import java.net.URL;
+
+import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 public class ChooseNetworkActivity extends AppCompatActivity {
+
+    private static final String TAG = ChooseNetworkActivity.class.getSimpleName();
+    @Inject
+    ErrorHandler mErrorHandler;
 
     @InjectView(R.id.activity_choose_network_url_et)
     EditText mUrlEt;
@@ -26,6 +39,12 @@ public class ChooseNetworkActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_network);
+
+        ChooseNetworkComponent component = DaggerChooseNetworkComponent.builder()
+                .chooseNetworkModule(new ChooseNetworkModule())
+                .build();
+        component.inject(this);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.action_toolbar);
 
         setSupportActionBar(toolbar);
@@ -60,10 +79,19 @@ public class ChooseNetworkActivity extends AppCompatActivity {
 
     private void returnSelectedValue() {
         if (!TextUtils.isEmpty(mUrlEt.getText())) {
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra(Constants.SELECTED_URL, mUrlEt.getText().toString());
-            setResult(Activity.RESULT_OK, resultIntent);
-            finish();
+            // Check it's a valid url
+            try {
+                URL url = new URL(mUrlEt.getText().toString());
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra(Constants.SELECTED_URL, url.toURI().getPath());
+                setResult(Activity.RESULT_OK, resultIntent);
+                finish();
+
+            } catch (Exception e) {
+                BaseEvent error = new BaseEvent();
+                error.setErrorMessage(getString(R.string.bad_url));
+                mErrorHandler.showError(this, error);
+            }
         }
     }
 }

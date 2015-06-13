@@ -1,6 +1,7 @@
 package com.mccorby.wordcounter.datasource.network;
 
 import com.mccorby.wordcounter.datasource.ExternalDatasourceImpl;
+import com.mccorby.wordcounter.domain.abstractions.Bus;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +17,8 @@ public class NetworkDatasourceImpl extends ExternalDatasourceImpl {
     private final URL mUrl;
     private HttpURLConnection connection;
 
-    public NetworkDatasourceImpl(URL url) {
+    public NetworkDatasourceImpl(Bus bus, URL url) {
+        super(bus);
         this.mUrl = url;
     }
 
@@ -34,24 +36,18 @@ public class NetworkDatasourceImpl extends ExternalDatasourceImpl {
     }
 
     @Override
-    protected InputStream obtainInputStream() {
-        InputStream input = null;
+    protected InputStream obtainInputStream() throws IOException {
+        InputStream input;
         connection = null;
-        try {
+        connection = (HttpURLConnection) mUrl.openConnection();
+        connection.connect();
 
-            connection = (HttpURLConnection) mUrl.openConnection();
-            connection.connect();
-
-            // Expect HTTP 200
-            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                // Handle server error messages
-            }
-            // Get the file using the internal app filesystem
-            input = connection.getInputStream();
-            return input;
-        } catch (Exception e) {
-            e.printStackTrace();
+        // Expect HTTP 200
+        if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+            // Handle server error messages
         }
-        return null;
+        // Get the file using the internal app filesystem
+        input = connection.getInputStream();
+        return input;
     }
 }

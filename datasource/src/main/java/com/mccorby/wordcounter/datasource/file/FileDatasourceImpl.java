@@ -1,6 +1,7 @@
 package com.mccorby.wordcounter.datasource.file;
 
 import com.mccorby.wordcounter.datasource.ExternalDatasourceImpl;
+import com.mccorby.wordcounter.domain.abstractions.Bus;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,7 +13,8 @@ public class FileDatasourceImpl extends ExternalDatasourceImpl {
 
     private final File mFile;
 
-    public FileDatasourceImpl(File file) {
+    public FileDatasourceImpl(Bus bus, File file) {
+        super(bus);
         this.mFile = file;
     }
 
@@ -26,12 +28,7 @@ public class FileDatasourceImpl extends ExternalDatasourceImpl {
     }
 
     @Override
-    protected InputStream obtainInputStream() {
-        try {
-            return new FileInputStream(mFile);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
+    protected InputStream obtainInputStream() throws FileNotFoundException {
+        return new FileInputStream(mFile);
     }
 }

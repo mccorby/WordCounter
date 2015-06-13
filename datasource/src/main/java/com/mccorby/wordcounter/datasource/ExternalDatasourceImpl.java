@@ -1,5 +1,7 @@
 package com.mccorby.wordcounter.datasource;
 
+import com.mccorby.wordcounter.datasource.entities.ProcessEvent;
+import com.mccorby.wordcounter.domain.abstractions.Bus;
 import com.mccorby.wordcounter.domain.entities.WordOccurrence;
 import com.mccorby.wordcounter.repository.datasources.ExternalDatasource;
 
@@ -24,13 +26,18 @@ import java.util.regex.Pattern;
  */
 public abstract class ExternalDatasourceImpl implements ExternalDatasource {
 
+    private final Bus mBus;
     private OnWordAvailableListener mListener;
+
+    public ExternalDatasourceImpl(Bus bus) {
+        this.mBus = bus;
+    }
 
     /**
      * Retrieve the input stream this external datasource provides.
      * @return an InputStream object to be parsed
      */
-    protected abstract InputStream obtainInputStream();
+    protected abstract InputStream obtainInputStream() throws IOException;
 
     /**
      * Operations that must be done after processing the input.
@@ -81,6 +88,9 @@ public abstract class ExternalDatasourceImpl implements ExternalDatasource {
             this.mListener = listener;
             process();
         } catch (IOException e) {
+            ProcessEvent errorEvent = new ProcessEvent(ProcessEvent.EVENTS.ERROR);
+            errorEvent.setErrorMessage("Error parsing input");
+            mBus.post(errorEvent);
             e.printStackTrace();
         }
     }

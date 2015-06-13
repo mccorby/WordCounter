@@ -20,6 +20,7 @@ public interface MainComponent {
 
     void inject(WordOccurrenceListFragment fragment);
     void inject(MainPresenter presenter);
+
     MainPresenter getMainPresenter();
     File getRootDirectory();
     Bus getBus();

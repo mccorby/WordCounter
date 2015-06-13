@@ -6,7 +6,7 @@ package com.mccorby.wordcounter.datasource.entities;
 public class ProcessEvent extends BaseEvent {
 
     public enum EVENTS {
-        STARTED, DONE, SORT_DONE
+        STARTED, DONE, ERROR, SORT_DONE
     }
 
     public ProcessEvent(EVENTS eventType) {

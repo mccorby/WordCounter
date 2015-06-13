@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +21,8 @@ import com.mccorby.wordcounter.app.views.chooser.ChooseNetworkActivity;
 import com.mccorby.wordcounter.app.views.di.DaggerMainComponent;
 import com.mccorby.wordcounter.app.views.di.MainComponent;
 import com.mccorby.wordcounter.app.views.di.MainModule;
+import com.mccorby.wordcounter.app.views.error.ErrorHandler;
+import com.mccorby.wordcounter.datasource.entities.BaseEvent;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -46,6 +47,10 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
 
     @Inject
     MainPresenter mPresenter;
+
+    @Inject
+    ErrorHandler mErrorHandler;
+
     private boolean isProcessing;
 
     /**
@@ -161,6 +166,11 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
         getActivity().invalidateOptionsMenu();
     }
 
+    @Override
+    public void displayError(BaseEvent errorMessage) {
+        mErrorHandler.showError(getActivity(), errorMessage);
+    }
+
     private void chooseFile() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("file/*");
@@ -184,12 +194,11 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
                     break;
                 case NETWORK_SELECTION_REQUEST_CODE:
                     String urlData = data.getStringExtra(Constants.SELECTED_URL);
-                    Log.d(TAG, "url copied " + urlData);
                     URL url = null;
                     try {
                         url = new URL(urlData);
                     } catch (MalformedURLException e) {
-                        e.printStackTrace();
+                        // We shouldn't be here
                     }
                     mPresenter.processUrl(url);
                     break;

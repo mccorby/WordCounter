@@ -103,6 +103,9 @@ public class MainPresenter implements Presenter {
         Log.d(TAG, "PROCESS => " + event.getEventType());
         if (mMainView != null) {
             switch (event.getEventType()) {
+                case ERROR:
+                    mMainView.displayError(event);
+                    break;
                 case STARTED:
                     if (mMainView != null) {
                         mMainView.processStarted();
@@ -166,7 +169,7 @@ public class MainPresenter implements Presenter {
     }
 
     public void processFile(File file) {
-        ExternalDatasource externalDatasource = new FileDatasourceImpl(file);
+        ExternalDatasource externalDatasource = new FileDatasourceImpl(mBus, file);
         CacheDatasource cacheDatasource = new InMemoryCacheDatasource(mBus);
 
         repo = new WordOccurrenceRepositoryImpl(externalDatasource, cacheDatasource);
@@ -177,7 +180,7 @@ public class MainPresenter implements Presenter {
 
     public void processUrl(URL url) {
         if (url != null) {
-            ExternalDatasource externalDatasource = new NetworkDatasourceImpl(url);
+            ExternalDatasource externalDatasource = new NetworkDatasourceImpl(mBus, url);
             CacheDatasource cacheDatasource = new InMemoryCacheDatasource(mBus);
 
             repo = new WordOccurrenceRepositoryImpl(externalDatasource, cacheDatasource);
