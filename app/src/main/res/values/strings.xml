@@ -1,10 +1,8 @@
 <resources>
-    <string name="app_name">WordCounter</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="app_name">Word Counter</string>
+    <string name="title_activity_main">Word Counter</string>
 
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
-
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="sort_default">Default</string>
+    <string name="sort_alpha">Alphanumeric</string>
+    <string name="sort_occurrences">By occurrences</string>
 </resources>

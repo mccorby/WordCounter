@@ -6,6 +6,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -43,6 +46,7 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         // TODO This to be replaced by injection!
         if (mPresenter == null) {
             mPresenter = new MainPresenter(this);
@@ -85,6 +89,28 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
     public void onDestroy() {
         super.onDestroy();
         mPresenter.onDestroy();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menuSortAlpha:
+                mPresenter.sortList(MainPresenter.SORTING.ALPHANUMERIC);
+                break;
+            case R.id.menuSortDefault:
+                mPresenter.sortList(MainPresenter.SORTING.DEFAULT);
+                break;
+            case R.id.menuSortOccurrences:
+                mPresenter.sortList(MainPresenter.SORTING.OCCURRENCES);
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

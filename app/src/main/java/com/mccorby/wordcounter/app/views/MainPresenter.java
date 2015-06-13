@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.mccorby.wordcounter.app.domain.BusImpl;
 import com.mccorby.wordcounter.app.domain.InteractorInvokerImpl;
+import com.mccorby.wordcounter.app.domain.interactors.SortWordOccurrencesInteractor;
 import com.mccorby.wordcounter.app.presentation.MainView;
 import com.mccorby.wordcounter.app.presentation.Presenter;
 import com.mccorby.wordcounter.datasource.cache.InMemoryCacheDatasource;
@@ -14,7 +15,6 @@ import com.mccorby.wordcounter.domain.abstractions.Bus;
 import com.mccorby.wordcounter.domain.entities.WordOccurrence;
 import com.mccorby.wordcounter.domain.interactors.GetWordListInteractor;
 import com.mccorby.wordcounter.domain.interactors.Interactor;
-import com.mccorby.wordcounter.domain.interactors.SortWordOccurrencesInteractor;
 import com.mccorby.wordcounter.domain.repository.WordOccurrenceRepository;
 import com.mccorby.wordcounter.repository.WordOccurrenceRepositoryImpl;
 import com.mccorby.wordcounter.repository.datasources.CacheDatasource;
@@ -56,7 +56,8 @@ public class MainPresenter implements Presenter {
     private Interactor mInteractor;
     private InteractorInvokerImpl mInteractorInvoker;
 
-    /** A reference to the list of words to handle sorting.
+    /**
+     * A reference to the list of words to handle sorting.
      * I consider the sorted list belongs to the presentation layer thus it should
      * be handled directly by the presenter.
      */
@@ -110,11 +111,9 @@ public class MainPresenter implements Presenter {
     // Events this presenter listens to
 
     public void onEvent(WordOccurrenceEvent event) {
-        Log.d(TAG, "Received new word " + event.getWordOccurrence());
         if (mMainView != null) {
             mMainView.notifyNewDataIsAvailable();
         }
-
     }
 
     public void onEvent(ProcessEvent event) {
@@ -124,8 +123,12 @@ public class MainPresenter implements Presenter {
                 case STARTED:
                     break;
                 case DONE:
-                    sortList(SORTING.OCCURRENCES);
-                    mMainView.processDone();
+                    if (mMainView != null) {
+                        mMainView.processDone();
+                    }
+                    break;
+                case SORT_DONE:
+                    mMainView.notifyNewDataIsAvailable();
                     break;
             }
         }
@@ -135,7 +138,7 @@ public class MainPresenter implements Presenter {
         @Override
         public int compare(WordOccurrence lhs, WordOccurrence rhs) {
             return lhs.getWord().compareToIgnoreCase(rhs.getWord());
-    }
+        }
     };
 
     private Comparator<WordOccurrence> mOccurrencesComparator = new Comparator<WordOccurrence>() {
@@ -147,6 +150,7 @@ public class MainPresenter implements Presenter {
 
     /**
      * Sorts the list as defined in the assignemnt.
+     *
      * @param sorting the sorting type
      */
     public void sortList(SORTING sorting) {
@@ -169,10 +173,6 @@ public class MainPresenter implements Presenter {
             Interactor sortInteractor = new SortWordOccurrencesInteractor(mSortedList, mBus, comparator);
             mInteractorInvoker.execute(sortInteractor);
         }
-    }
-
-    public void onEvent(List<WordOccurrence> sortedList) {
-        mMainView.notifyNewDataIsAvailable();
     }
 
     // Lifecycle related implementation

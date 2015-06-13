@@ -1,7 +1,9 @@
-package com.mccorby.wordcounter.domain.interactors;
+package com.mccorby.wordcounter.app.domain.interactors;
 
+import com.mccorby.wordcounter.datasource.entities.ProcessEvent;
 import com.mccorby.wordcounter.domain.abstractions.Bus;
 import com.mccorby.wordcounter.domain.entities.WordOccurrence;
+import com.mccorby.wordcounter.domain.interactors.Interactor;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -9,6 +11,9 @@ import java.util.List;
 
 /**
  * An interactor representing the use case of sorting. Sort strategy is provided by the client.
+ * This command could have been defined in the domain layer. However, I consider sorting to be a
+ * presentation use case not affecting the underlying data.
+ *
  * Created by JAC on 13/06/2015.
  */
 public class SortWordOccurrencesInteractor implements Interactor {
@@ -26,7 +31,6 @@ public class SortWordOccurrencesInteractor implements Interactor {
     @Override
     public void execute() {
         Collections.sort(mList, mComparator);
-        // TODO Better to send a signal as the list object is the same holded by the client that invoked the interactor.
-        mBus.post(mList);
+        mBus.post(new ProcessEvent(ProcessEvent.EVENTS.SORT_DONE));
     }
 }
