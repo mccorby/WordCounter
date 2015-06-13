@@ -22,6 +22,14 @@ import java.util.Map;
  * - Each new add to the cache (let that be as a new word or as an increment in an existing one)
  * will trigger a post in the post for registered objects to handle it.
  *
+ * The cache holds a second list with the values that is properly built when required.
+ * The alternative was to recreate the list from the values in the map every time the client
+ * asked for it. This is a costly operation. I have eventually chosen performance over memory consumption.
+ * If the number of objects in the map is too big, nonetheless, it would require some other kind of cache
+ * as a database.
+ * There are around 1 million words in English... worst case would be 2 million objects
+ * in memory. To analyze
+ *
  * Created by JAC on 11/06/2015.
  */
 public class InMemoryCacheDatasource implements CacheDatasource {
