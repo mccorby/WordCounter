@@ -1,6 +1,7 @@
 package com.mccorby.wordcounter.datasource.network;
 
 import com.mccorby.wordcounter.datasource.ExternalDatasourceImpl;
+import com.mccorby.wordcounter.datasource.entities.WordParser;
 import com.mccorby.wordcounter.domain.abstractions.Bus;
 
 import java.io.IOException;
@@ -17,8 +18,8 @@ public class NetworkDatasourceImpl extends ExternalDatasourceImpl {
     private final URL mUrl;
     private HttpURLConnection connection;
 
-    public NetworkDatasourceImpl(Bus bus, URL url) {
-        super(bus);
+    public NetworkDatasourceImpl(Bus bus, WordParser parser, URL url) {
+        super(bus, parser);
         this.mUrl = url;
     }
 

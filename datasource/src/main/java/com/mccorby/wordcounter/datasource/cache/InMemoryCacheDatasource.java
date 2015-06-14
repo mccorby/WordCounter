@@ -2,6 +2,7 @@ package com.mccorby.wordcounter.datasource.cache;
 
 import com.mccorby.wordcounter.datasource.entities.ProcessEvent;
 import com.mccorby.wordcounter.datasource.entities.WordOccurrenceEvent;
+import com.mccorby.wordcounter.datasource.entities.WordParser;
 import com.mccorby.wordcounter.domain.abstractions.Bus;
 import com.mccorby.wordcounter.domain.entities.WordOccurrence;
 import com.mccorby.wordcounter.repository.datasources.CacheDatasource;
@@ -35,14 +36,16 @@ import java.util.Map;
 public class InMemoryCacheDatasource implements CacheDatasource {
 
     private Map<WordOccurrence, WordOccurrence> mData;
-    private Bus mBus;
+    private final Bus mBus;
+    private final WordParser mParser;
 
     private List<WordOccurrence> mClientList;
 
-    public InMemoryCacheDatasource(Bus bus) {
+    public InMemoryCacheDatasource(Bus bus, WordParser parser) {
         mData = new LinkedHashMap<>();
         mClientList = new ArrayList<>();
         this.mBus = bus;
+        this.mParser = parser;
     }
 
     @Override

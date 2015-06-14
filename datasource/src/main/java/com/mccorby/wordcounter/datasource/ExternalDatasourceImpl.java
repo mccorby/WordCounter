@@ -1,6 +1,7 @@
 package com.mccorby.wordcounter.datasource;
 
 import com.mccorby.wordcounter.datasource.entities.ProcessEvent;
+import com.mccorby.wordcounter.datasource.entities.WordParser;
 import com.mccorby.wordcounter.domain.abstractions.Bus;
 import com.mccorby.wordcounter.domain.entities.WordOccurrence;
 import com.mccorby.wordcounter.repository.datasources.ExternalDatasource;
@@ -9,8 +10,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
 
 /**
  * A template method pattern that defines the steps to obtain the words from any InputStream
@@ -27,10 +27,12 @@ import java.util.regex.Pattern;
 public abstract class ExternalDatasourceImpl implements ExternalDatasource {
 
     private final Bus mBus;
+    private final WordParser mParser;
     private OnWordAvailableListener mListener;
 
-    public ExternalDatasourceImpl(Bus bus) {
+    public ExternalDatasourceImpl(Bus bus, WordParser parser) {
         this.mBus = bus;
+        this.mParser = parser;
     }
 
     /**
@@ -56,10 +58,9 @@ public abstract class ExternalDatasourceImpl implements ExternalDatasource {
         String line;
         BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
         while ((line = in.readLine()) != null) {
-            Pattern pattern = Pattern.compile("\\w+");
-            Matcher matcher = pattern.matcher(line);
-            while (matcher.find()) {
-                WordOccurrence occurrence = new WordOccurrence(matcher.group());
+            List<String> words = mParser.parse(line);
+            for (String word : words) {
+                WordOccurrence occurrence = new WordOccurrence(word);
                 if (mListener != null)  {
                     mListener.onWordAvailable(occurrence);
                 }

@@ -4,9 +4,11 @@ import android.util.Log;
 
 import com.mccorby.wordcounter.app.presentation.MainView;
 import com.mccorby.wordcounter.app.presentation.Presenter;
+import com.mccorby.wordcounter.app.views.parsers.SimpleWordParser;
 import com.mccorby.wordcounter.datasource.cache.InMemoryCacheDatasource;
 import com.mccorby.wordcounter.datasource.entities.ProcessEvent;
 import com.mccorby.wordcounter.datasource.entities.WordOccurrenceEvent;
+import com.mccorby.wordcounter.datasource.entities.WordParser;
 import com.mccorby.wordcounter.datasource.file.FileDatasourceImpl;
 import com.mccorby.wordcounter.datasource.network.NetworkDatasourceImpl;
 import com.mccorby.wordcounter.domain.abstractions.Bus;
@@ -152,8 +154,9 @@ public class MainPresenter implements Presenter {
     }
 
     public void processFile(File file) {
-        ExternalDatasource externalDatasource = new FileDatasourceImpl(mBus, file);
-        CacheDatasource cacheDatasource = new InMemoryCacheDatasource(mBus);
+        WordParser parser = new SimpleWordParser();
+        ExternalDatasource externalDatasource = new FileDatasourceImpl(mBus, parser, file);
+        CacheDatasource cacheDatasource = new InMemoryCacheDatasource(mBus, parser);
 
         mRepository = new WordOccurrenceRepositoryImpl(externalDatasource, cacheDatasource);
         mInteractor = new GetWordListInteractor(mRepository);
@@ -163,8 +166,9 @@ public class MainPresenter implements Presenter {
 
     public void processUrl(URL url) {
         if (url != null) {
-            ExternalDatasource externalDatasource = new NetworkDatasourceImpl(mBus, url);
-            CacheDatasource cacheDatasource = new InMemoryCacheDatasource(mBus);
+            WordParser parser = new SimpleWordParser();
+            ExternalDatasource externalDatasource = new NetworkDatasourceImpl(mBus, parser, url);
+            CacheDatasource cacheDatasource = new InMemoryCacheDatasource(mBus, parser);
 
             mRepository = new WordOccurrenceRepositoryImpl(externalDatasource, cacheDatasource);
             mInteractor = new GetWordListInteractor(mRepository);

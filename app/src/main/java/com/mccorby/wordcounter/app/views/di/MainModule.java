@@ -10,7 +10,9 @@ import com.mccorby.wordcounter.app.presentation.MainView;
 import com.mccorby.wordcounter.app.views.error.BasicErrorHandler;
 import com.mccorby.wordcounter.app.views.error.ErrorHandler;
 import com.mccorby.wordcounter.app.views.main.MainPresenter;
+import com.mccorby.wordcounter.app.views.parsers.SimpleWordParser;
 import com.mccorby.wordcounter.datasource.cache.InMemoryCacheDatasource;
+import com.mccorby.wordcounter.datasource.entities.WordParser;
 import com.mccorby.wordcounter.datasource.network.NetworkDatasourceImpl;
 import com.mccorby.wordcounter.domain.abstractions.Bus;
 import com.mccorby.wordcounter.domain.abstractions.InteractorInvoker;
@@ -62,9 +64,14 @@ public class MainModule {
     }
 
     @Provides
+    public WordParser provideWordParser() {
+        return new SimpleWordParser();
+    }
+
+    @Provides
     @ActivityScope
-    public CacheDatasource provideCacheDatasource(Bus bus) {
-        return new InMemoryCacheDatasource(bus);
+    public CacheDatasource provideCacheDatasource(Bus bus, WordParser wordParser) {
+        return new InMemoryCacheDatasource(bus, wordParser);
     }
 
     @Provides
@@ -80,8 +87,8 @@ public class MainModule {
 
     @Provides
     @ActivityScope
-    public ExternalDatasource provideExternalDatasource(Bus bus, URL url) {
-        return new NetworkDatasourceImpl(bus, url);
+    public ExternalDatasource provideExternalDatasource(Bus bus, URL url, WordParser parser) {
+        return new NetworkDatasourceImpl(bus, parser, url);
     }
 
     @Provides

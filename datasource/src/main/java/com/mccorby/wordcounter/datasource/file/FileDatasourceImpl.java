@@ -1,6 +1,7 @@
 package com.mccorby.wordcounter.datasource.file;
 
 import com.mccorby.wordcounter.datasource.ExternalDatasourceImpl;
+import com.mccorby.wordcounter.datasource.entities.WordParser;
 import com.mccorby.wordcounter.domain.abstractions.Bus;
 
 import java.io.File;
@@ -13,8 +14,8 @@ public class FileDatasourceImpl extends ExternalDatasourceImpl {
 
     private final File mFile;
 
-    public FileDatasourceImpl(Bus bus, File file) {
-        super(bus);
+    public FileDatasourceImpl(Bus bus, WordParser parser, File file) {
+        super(bus, parser);
         this.mFile = file;
     }
 
