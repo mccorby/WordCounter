@@ -12,4 +12,5 @@
     <string name="title_activity_choose_network">Choose URL</string>
     <string name="save">Save</string>
     <string name="bad_url">That doesn\'t seem like a valid URL</string>
+    <string name="no_available_filemanager">No available file manager</string>
 </resources>

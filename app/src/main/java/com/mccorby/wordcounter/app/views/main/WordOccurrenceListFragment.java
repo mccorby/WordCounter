@@ -3,6 +3,8 @@ package com.mccorby.wordcounter.app.views.main;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -27,13 +29,14 @@ import com.mccorby.wordcounter.datasource.entities.BaseEvent;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 import javax.inject.Inject;
 
 /**
  * Use the {@link WordOccurrenceListFragment#newInstance} factory method to
  * create an instance of this fragment.
- *
+ * <p/>
  * TODO Refactor source chooser
  */
 public class WordOccurrenceListFragment extends Fragment implements MainView {
@@ -60,8 +63,7 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
      * @return A new instance of fragment WordOccurrenceListFragment.
      */
     public static WordOccurrenceListFragment newInstance() {
-        WordOccurrenceListFragment fragment = new WordOccurrenceListFragment();
-        return fragment;
+        return new WordOccurrenceListFragment();
     }
 
     public WordOccurrenceListFragment() {
@@ -172,9 +174,19 @@ public class WordOccurrenceListFragment extends Fragment implements MainView {
     }
 
     private void chooseFile() {
+
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("file/*");
-        startActivityForResult(intent, FILE_SELECTION_REQUEST_CODE);
+
+        List<ResolveInfo> pkgAppsList = getActivity().getApplicationContext()
+                .getPackageManager().queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
+        if (pkgAppsList == null || pkgAppsList.size() == 0) {
+            BaseEvent error = new BaseEvent();
+            error.setErrorMessage(getString(R.string.no_available_filemanager));
+            mErrorHandler.showError(getActivity(), error);
+        } else {
+            startActivityForResult(intent, FILE_SELECTION_REQUEST_CODE);
+        }
     }
 
     private void chooseNetwork() {
